@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from .models import *
 
 def Registration(request):
     if request.method == 'POST':
@@ -41,7 +43,7 @@ def Login(request):
 
         if user is not None:
             login(request, user)
-            return redirect('home/')
+            return redirect('home')
     return render(request, 'login.html')
 
 def Logout(request):
@@ -51,6 +53,22 @@ def Logout(request):
 
 def Home(request):
     return render(request, 'home.html')
+
+@login_required
+def seller_dashboard(request):
+    # Ensure the user is authenticated before accessing the dashboard
+    if not request.user.is_authenticated:
+        return redirect('login')
+    # Fetch seller's properties and other relevant data
+    seller_id = request.user.id
+    properties = Property.objects.filter(seller_id=seller_id)
+    
+    context = {
+        'seller_id': seller_id,
+        'properties': properties
+    }
+    # Render the seller dashboard with the context
+    return render(request, 'seller_dashboard.html', context)
 
 
 
