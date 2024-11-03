@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import *
 from .forms import PropertyForm
+from django.urls import reverse
 
 def Registration(request):
     if request.method == 'POST':
@@ -97,6 +98,85 @@ def update_property(request, property_id):
     return render(request, 'update_property.html', {'form': form})
 
 
+@login_required
+def add_property(request):
+    if request.method == 'POST':
+        form = PropertyForm(request.POST)
+        if form.is_valid():
+            property = form.save(commit=False)
+            property.seller = request.user  # Set the current user as the seller
+            property.save()
+            return redirect('property_list')
+    else:
+        form = PropertyForm()
+    return render(request, 'properties/add_property.html', {'form': form})
+
+@login_required
+def property_list(request):
+    properties = Property.objects.filter(seller=request.user)
+    return render(request, 'properties/property_list.html', {'properties': properties})
+
+@login_required
+def seller_bookings(request):
+    # Fetch properties listed by the logged-in seller and related bookings
+    properties = Property.objects.filter(seller=request.user).select_related('seller')
+    bookings = Booking.objects.filter(property__in=properties).select_related('property', 'client')
+    
+    # Prepare context for the template
+    context = {
+        'bookings': bookings,
+    }
+    return render(request, 'seller_bookings.html', context)
+
+@login_required
+def property_detail(request, property_id):
+    # Retrieve the property by ID or return a 404 if not found
+    property = get_object_or_404(Property, id=property_id)
+    
+    # Initialize booking to None; will only populate if the user has an active booking
+    booking = None
+    
+    # Check if the authenticated user has any booking for this property
+    if request.user.is_authenticated:
+        booking = Booking.objects.filter(property=property, client=request.user).first()
+    
+    # Determine if the property is available for booking:
+    # - It should be available
+    # - Either no booking exists for this user, or the existing booking was rejected
+    is_available = property.is_available and (booking is None or booking.approval_status == 'rejected')
+
+    # Prepare context data for rendering
+    context = {
+        'property': property,
+        'booking': booking,
+        'is_available': is_available,
+    }
+    
+    # Render the property detail page with context
+    return render(request, 'property_details.html', context)
+
+
+@login_required
+def book_property(request, property_id):
+    # Retrieve the property; ensure it is available
+    property = get_object_or_404(Property, id=property_id, is_available=True)
+    
+    # Check if the user already has a pending or approved booking for this property
+    existing_booking = Booking.objects.filter(
+        property=property, client=request.user, approval_status__in=['pending', 'approved']
+    ).first()
+    
+    if existing_booking:
+        # Redirect to property details with a message if a booking already exists
+        messages.warning(request, "You already have a pending or approved booking for this property.")
+        return redirect('property_detail', property_id=property.id)
+
+    # Create a new booking if no previous booking exists
+    Booking.objects.create(property=property, client=request.user, is_booked=True, approval_status='pending')
+    
+    # Redirect to a confirmation or properties page with a success message
+    messages.success(request, "Your booking request has been submitted and is pending approval.")
+    return redirect(reverse('property_detail', args=[property.id]))
 
 def booking_list(request):
     bookings = Booking.objects.all()  # Retrieve all bookings, or filter by user if needed

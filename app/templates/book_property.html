@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Property</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <!-- Main Container -->
+    <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
+        
+        <!-- Property Title -->
+        <h2 class="text-3xl font-bold text-blue-600 mb-4 text-center">Book {{ property.name }}</h2>
+        
+        <!-- Property Description -->
+        <p class="text-gray-700 mb-2 text-lg text-center">{{ property.description }}</p>
+        
+        <!-- Property Price -->
+        <p class="text-gray-900 font-semibold mb-6 text-center">Price: <span class="text-green-600">${{ property.price }}</span></p>
+        
+        <!-- Booking Form -->
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+            
+            <!-- Submit Button -->
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                Submit Booking Request
+            </button>
+        </form>
+        
+    </div>
+
+</body>
+</html>
