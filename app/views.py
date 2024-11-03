@@ -1,9 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import *
+from .forms import PropertyForm
 
 def Registration(request):
     if request.method == 'POST':
@@ -70,5 +71,35 @@ def seller_dashboard(request):
     # Render the seller dashboard with the context
     return render(request, 'seller_dashboard.html', context)
 
+def Properties(request):
+    property=Property.objects.all()
+    context={
+        'property':property
+    }
+    return render(request,'property.html',context)
+
+
+@login_required
+def update_property(request, property_id):
+    # Get the property and check if it belongs to the current user
+    property_instance = get_object_or_404(Property, id=property_id, seller=request.user)
+    
+    # If it's a POST request, handle the form submission
+    if request.method == 'POST':
+        form = PropertyForm(request.POST, instance=property_instance)
+        if form.is_valid():
+            form.save()
+            return redirect('seller_dashboard')  # Redirect to dashboard after updating
+    else:
+        form = PropertyForm(instance=property_instance)
+
+    # Render the update page
+    return render(request, 'update_property.html', {'form': form})
+
+
+
+def booking_list(request):
+    bookings = Booking.objects.all()  # Retrieve all bookings, or filter by user if needed
+    return render(request, 'booking_list.html', {'bookings': bookings})
 
 

@@ -6,5 +6,6 @@ urlpatterns = [
     path('register/', views.Registration, name='register'),
     path('login/', views.Login, name='login'),
     path('logout/', views.Logout, name='logout'),
-    path('seller_dashboard/', views.seller_dashboard, name='seller_dashboard')
+    path('seller_dashboard/', views.seller_dashboard, name='seller_dashboard'),
+    path('update/<int:property_id>/', views.update_property, name='update_property'),
 ]
