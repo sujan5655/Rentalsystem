@@ -17,7 +17,7 @@
 
         <!-- Property Details -->
         <div class="mb-4">
-            <p class="text-gray-700"><strong>Price:</strong> ${{ property.price }}</p>
+            <p class="text-gray-700"><strong>Price:</strong> {{ property.price }}</p>
             <p class="text-gray-700"><strong>Location:</strong> {{ property.location }}</p>
             <p class="text-gray-700"><strong>Property ID:</strong> {{ property.id }}</p>
             <p class="text-gray-700"><strong>Status:</strong> {{ property.status|title }}</p>
@@ -37,7 +37,7 @@
 
         <!-- Back Link -->
         <div class="mt-6 text-center">
-            <a href="{% url 'property_list' %}" class="text-blue-500 hover:underline">Back to Property List</a>
+            <a href="{% url 'allproperties' %}" class="text-blue-500 hover:underline">Back to Property List</a>
         </div>
     </div>
 </body>

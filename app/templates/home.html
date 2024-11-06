@@ -1,29 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cooper Rentals - Admin Panel</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="flex flex-col min-h-screen bg-gray-100">
+{% extends 'index.html' %}
 
-  <!-- Navbar -->
-  <nav class="bg-blue-600 p-4 shadow-md">
-    <div class="container mx-auto flex justify-between items-center">
-      <!-- Logo/Brand Name -->
-      <a href="/" class="text-white text-2xl font-bold">Cooper Rentals</a>
-
-      <!-- Navbar Links -->
-      <div class="space-x-6">
-        <a href="/" class="text-white hover:text-blue-200">Home</a>
-        <a href="/contact" class="text-white hover:text-blue-200">Contact</a>
-        <a href="/login" class="text-white hover:text-blue-200">Login</a>
-        <a href="/signup" class="bg-white text-blue-600 font-semibold py-2 px-4 rounded hover:bg-blue-100">Sign Up</a>
-      </div>
-    </div>
-  </nav>
-
+{% block title %} Home Page {% endblock %}
+{% block content %}
   <!-- Main Content -->
   <main class="flex-grow">
     <div class="container mx-auto py-12">
@@ -43,7 +21,7 @@
 
         <!-- User Management Card -->
         <div class="bg-white rounded-lg shadow-md p-6">
-          <h2 class="text-xl font-semibold text-blue-600">Users Management</h2>
+          <h2 class="text-xl font-semibold text-blue-600">User Management</h2>
           <p class="mt-2 text-gray-600">Manage user accounts, roles, and permissions.</p>
         </div>
 
@@ -55,13 +33,4 @@
       </div>
     </div>
   </main>
-
-  <!-- Footer -->
-  <footer class="bg-blue-600 py-6 mt-10">
-    <div class="container mx-auto text-center text-white">
-      <p>&copy; 2024 Cooper Rentals. All rights reserved.</p>
-    </div>
-  </footer>
-
-</body>
-</html>
+{% endblock %}

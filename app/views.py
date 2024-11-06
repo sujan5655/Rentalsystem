@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404,HttpResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -6,6 +6,10 @@ from django.contrib import messages
 from .models import *
 from .forms import PropertyForm
 from django.urls import reverse
+from django.template import loader
+
+def index(request):
+    return render(request, 'index.html')
 
 def Registration(request):
     if request.method == 'POST':
@@ -101,15 +105,18 @@ def update_property(request, property_id):
 @login_required
 def add_property(request):
     if request.method == 'POST':
-        form = PropertyForm(request.POST)
+        form = PropertyForm(request.POST, request.FILES)  # Include request.FILES for image upload
         if form.is_valid():
             property = form.save(commit=False)
-            property.seller = request.user  # Set the current user as the seller
+            property.seller = request.user
+            # Set availability based on checkbox
+            is_available = request.POST.get('is_available')
+            property.is_available = True if is_available == "on" else False
             property.save()
-            return redirect('property_list')
+            return redirect('allproperties')  # Redirect to avoid resubmission on page refresh
     else:
         form = PropertyForm()
-    return render(request, 'properties/add_property.html', {'form': form})
+    return render(request, 'add_property.html', {'form': form})
 
 @login_required
 def property_list(request):

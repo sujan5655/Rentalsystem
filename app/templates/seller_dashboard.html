@@ -21,7 +21,7 @@
 
         <!-- Add Property Button -->
         <div class="text-right mb-6">
-            <a href="" class="bg-blue-600 text-white py-2 px-4 rounded-lg shadow hover:bg-blue-700 transition duration-300 ease-in-out">
+            <a href="{% url 'add_property' %}" class="bg-blue-600 text-white py-2 px-4 rounded-lg shadow hover:bg-blue-700 transition duration-300 ease-in-out">
                 + Add New Property
             </a>
         </div>
@@ -46,7 +46,7 @@
                     <tr class="border-b border-gray-200 hover:bg-gray-100 transition duration-150">
                         <td class="py-4 px-6">{{ property.name }}</td>
                         <td class="py-4 px-6">{{ property.location }}</td>
-                        <td class="py-4 px-6">{{ property.price }}</td>
+                        <td class="py-4 px-6">{{ property.price|floatformat:2 }}</td>
                         <td class="py-4 px-6">
                             {% if property.is_available %}
                                 <span class="text-green-500 font-semibold">Yes</span>
@@ -58,6 +58,10 @@
                             <a href="{% url 'update_property' property.pk %}" class="text-blue-600 hover:text-blue-800 font-semibold transition duration-200">Edit</a>
                             <a href="{% url 'delete_property' property.pk %}" class="text-red-600 hover:text-red-800 font-semibold transition duration-200">Delete</a>
                         </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4 px-6 text-gray-500">No properties available.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
