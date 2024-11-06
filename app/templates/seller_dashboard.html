@@ -1,16 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seller Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+{% extends 'navbar_footer.html' %}
 
-    <!-- Container -->
-    <div class="container mx-auto px-4 py-12">
-
+{% block content %}
         <!-- Page Title and Welcome Message -->
         <div class="mb-8 text-center">
             <h1 class="text-4xl font-bold text-blue-700 mb-2">Seller Dashboard</h1>
@@ -46,7 +36,7 @@
                     <tr class="border-b border-gray-200 hover:bg-gray-100 transition duration-150">
                         <td class="py-4 px-6">{{ property.name }}</td>
                         <td class="py-4 px-6">{{ property.location }}</td>
-                        <td class="py-4 px-6">{{ property.price|floatformat:2 }}</td>
+                        <td class="py-4 px-6">{{ property.price }}</td>
                         <td class="py-4 px-6">
                             {% if property.is_available %}
                                 <span class="text-green-500 font-semibold">Yes</span>
@@ -59,16 +49,9 @@
                             <a href="{% url 'delete_property' property.pk %}" class="text-red-600 hover:text-red-800 font-semibold transition duration-200">Delete</a>
                         </td>
                     </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center py-4 px-6 text-gray-500">No properties available.</td>
-                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
-    </div>
-
-</body>
-</html>
+{% endblock %}

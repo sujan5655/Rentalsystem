@@ -1,12 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seller Booking Page</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-100 text-gray-800">
+{% extends 'navbar_footer.html' %}
+
+{% block content %}
     <div class="container mx-auto px-6 py-8">
         <h2 class="text-2xl font-bold text-blue-700 mb-6">Your Property Bookings</h2>
 
@@ -50,5 +44,4 @@
             <p class="text-gray-600 mt-4">No booking requests for your properties.</p>
         {% endif %}
     </div>
-</body>
-</html>
+{% endblock %}

@@ -55,10 +55,14 @@ def Login(request):
 def Logout(request):
     if request.user.is_authenticated:
         logout(request)  
-    return redirect('/login')  
+    return redirect('/')  
 
+@login_required
 def Home(request):
-    return render(request, 'home.html')
+    if not request.user.is_authenticated:
+        return redirect('login')
+    user = request.user
+    return render(request, 'home.html', )
 
 @login_required
 def seller_dashboard(request):
@@ -188,5 +192,39 @@ def book_property(request, property_id):
 def booking_list(request):
     bookings = Booking.objects.all()  # Retrieve all bookings, or filter by user if needed
     return render(request, 'booking_list.html', {'bookings': bookings})
+
+@login_required
+def approve_booking(request, id):
+    # Fetch the booking object, ensure it's not already booked
+    booking = get_object_or_404(Booking, id=id, property__is_booked=False)
+
+    if request.method == "POST":
+        approval_status = request.POST.get("status")
+        
+        # Check if the selected approval_status is valid
+        if approval_status in ["approved", "rejected"]:
+            booking.approval_status = approval_status
+            
+            if approval_status == "approved":
+                booking.property.is_booked = True
+                booking.property.save()  # Mark the property as booked
+
+            booking.save()  # Save the booking status
+            messages.success(request, f"The booking has been {approval_status} successfully.")
+            return redirect('/property')
+        else:
+            messages.error(request, "Invalid status selected.")
+
+    return render(request, 'approve_booking.html', {'booking': booking})
+
+
+@login_required
+def update_booking_status(request, booking_id, status):
+    booking = get_object_or_404(Booking, id=booking_id, property__seller=request.user)
+    if status in ['approved', 'rejected']:
+        booking.approval_status = status
+        booking.save()
+    return redirect('seller_bookings')
+
 
 
