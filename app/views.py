@@ -1,110 +1,89 @@
-from django.shortcuts import render, redirect, get_object_or_404,HttpResponse
+from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from .models import *
+from .models import Property, Booking
 from .forms import PropertyForm
-from django.urls import reverse
-from django.template import loader
 
-def index(request):
-    return render(request, 'index.html')
 
-def Registration(request):
-    if request.method == 'POST':
+def registration(request):
+    error = None
+    if request.method == "POST":
         username = request.POST.get('username')
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
         email = request.POST.get('email')
         password = request.POST.get('password')
-
-        # Check if username already exists
         if User.objects.filter(username=username).exists():
-            messages.error(request, "Username already exists.")
-            return render(request, 'signup.html')
+            error = "Username already exists"
+        else:
+            user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name, email=email, password=password)
+            return redirect("/login")
+    context = {
+        'error': error
+    }
+    return render(request, 'registrationPage.html', context)
 
-        # Create the new user if the username is not taken
-        user = User.objects.create_user(
-            username=username, 
-            first_name=first_name,
-            last_name=last_name, 
-            email=email, 
-            password=password
-        )
-        user.save()
-        messages.success(request, "Account created successfully.")
-        return redirect('login')  # Redirect to login after successful registration
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+from django.contrib.auth.models import User
 
-    # Render the registration form for GET request
-    return render(request, 'signup.html')
-
-
-
-def Login(request):
-    if request.method == "POST":
-        username = request.POST.get('username')
+def login_page(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
         password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
+        
+        # Ensure user exists before attempting authentication
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            messages.error(request, 'User with this email does not exist.')
+            return redirect('login')  # Redirect back to login page
 
+        # Authenticate the user
+        user = authenticate(request, username=user.username, password=password)
+        
         if user is not None:
             login(request, user)
-            return redirect('home')
-    return render(request, 'login.html')
+            return redirect('home')  # Redirect to a home page or desired page after login
+        else:
+            messages.error(request, 'Invalid email or password.')
+            return redirect('login')  # Redirect back to login page if authentication fails
 
-def Logout(request):
+    return render(request, 'loginPage.html')
+
+
+def logout_page(request):
     if request.user.is_authenticated:
         logout(request)  
-    return redirect('/')  
+    return redirect('/login/')  
 
-@login_required
-def Home(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    user = request.user
-    return render(request, 'home.html', )
+def home_page(request):
+    return render(request, 'home.html')
+
+from django.contrib.auth.decorators import login_required
 
 @login_required
 def seller_dashboard(request):
-    # Ensure the user is authenticated before accessing the dashboard
-    if not request.user.is_authenticated:
-        return redirect('login')
-    # Fetch seller's properties and other relevant data
-    seller_id = request.user.id
-    properties = Property.objects.filter(seller_id=seller_id)
-    
-    context = {
-        'seller_id': seller_id,
-        'properties': properties
-    }
-    # Render the seller dashboard with the context
-    return render(request, 'seller_dashboard.html', context)
-
-def Properties(request):
-    property=Property.objects.all()
-    context={
-        'property':property
-    }
-    return render(request,'property.html',context)
-
-
-@login_required
-def update_property(request, property_id):
-    # Get the property and check if it belongs to the current user
-    property_instance = get_object_or_404(Property, id=property_id, seller=request.user)
-    
-    # If it's a POST request, handle the form submission
-    if request.method == 'POST':
-        form = PropertyForm(request.POST, instance=property_instance)
-        if form.is_valid():
-            form.save()
-            return redirect('seller_dashboard')  # Redirect to dashboard after updating
+    # Check if the user is authenticated
+    if request.user.is_authenticated:
+        seller_id = request.user.id
+        properties=Property.objects.all()
+        # Proceed with your logic here
+        # For example, fetching seller's properties, bookings, etc.
+        context={
+         'seller_id':seller_id,
+         'properties':properties
+        }
+        # 
+        return render(request, 'seller_dashboard.html',{'seller_id': seller_id})
     else:
-        form = PropertyForm(instance=property_instance)
-
-    # Render the update page
-    return render(request, 'update_property.html', {'form': form})
-
+        # Redirect to login page if the user is not authenticated
+        return redirect('loginpage')
+    
+from django.shortcuts import render, redirect
+from .forms import PropertyForm
+from .models import Property
 
 @login_required
 def add_property(request):
@@ -122,77 +101,74 @@ def add_property(request):
         form = PropertyForm()
     return render(request, 'add_property.html', {'form': form})
 
-@login_required
-def property_list(request):
-    properties = Property.objects.filter(seller=request.user)
-    return render(request, 'properties/property_list.html', {'properties': properties})
 
-@login_required
-def seller_bookings(request):
-    # Fetch properties listed by the logged-in seller and related bookings
-    properties = Property.objects.filter(seller=request.user).select_related('seller')
-    bookings = Booking.objects.filter(property__in=properties).select_related('property', 'client')
+from django.shortcuts import get_object_or_404, redirect, render
+from .forms import PropertyForm
+from .models import Property
+
+from django.shortcuts import get_object_or_404, redirect, render
+from .forms import PropertyForm
+from .models import Property
+
+def update_property(request, id):
+    # Get the property instance by ID
+    property = get_object_or_404(Property, id=id)
+
+    if request.method == "POST":
+        # Bind form with POST data and instance to update
+        form = PropertyForm(request.POST, instance=property)
+        if form.is_valid():
+            updated_property = form.save(commit=False)
+            
+            # Set the seller to the current user (ensuring it's a User instance)
+            updated_property.seller = request.user
+            
+            # Update availability based on checkbox
+            is_available = request.POST.get('is_available')
+            updated_property.is_available = True if is_available == "on" else False
+            
+            # Save the updated property instance
+            updated_property.save()
+            return redirect('allproperties')  # Redirect to the seller dashboard
+            
+    else:
+        form = PropertyForm(instance=property)
     
-    # Prepare context for the template
     context = {
-        'bookings': bookings,
+        'form': form
     }
-    return render(request, 'seller_bookings.html', context)
-
-@login_required
-def property_detail(request, property_id):
-    # Retrieve the property by ID or return a 404 if not found
-    property = get_object_or_404(Property, id=property_id)
-    
-    # Initialize booking to None; will only populate if the user has an active booking
-    booking = None
-    
-    # Check if the authenticated user has any booking for this property
-    if request.user.is_authenticated:
-        booking = Booking.objects.filter(property=property, client=request.user).first()
-    
-    # Determine if the property is available for booking:
-    # - It should be available
-    # - Either no booking exists for this user, or the existing booking was rejected
-    is_available = property.is_available and (booking is None or booking.approval_status == 'rejected')
-
-    # Prepare context data for rendering
-    context = {
-        'property': property,
-        'booking': booking,
-        'is_available': is_available,
-    }
-    
-    # Render the property detail page with context
-    return render(request, 'property_details.html', context)
+    return render(request, 'update_property.html', context)
 
 
-@login_required
+from django.shortcuts import get_object_or_404, redirect, render
+from .models import Property, Booking
+from django.contrib.auth.decorators import login_required
+
+
 def book_property(request, property_id):
-    # Retrieve the property; ensure it is available
-    property = get_object_or_404(Property, id=property_id, is_available=True)
-    
-    # Check if the user already has a pending or approved booking for this property
-    existing_booking = Booking.objects.filter(
-        property=property, client=request.user, approval_status__in=['pending', 'approved']
-    ).first()
-    
-    if existing_booking:
-        # Redirect to property details with a message if a booking already exists
-        messages.warning(request, "You already have a pending or approved booking for this property.")
-        return redirect('property_detail', property_id=property.id)
+    property = get_object_or_404(Property, id=property_id)
+    property_image = property.image 
+    print(property_image)
+    if request.method == 'POST':
+        # Check if the property is not approved and is available
+        if property.approval_status != 'approved' and property.available:
+            # Process the booking request
+            # You can add your booking logic here
+            messages.success(request, 'Booking request submitted successfully.')
+            return redirect('success_url')  # Redirect to a success page or the same property page
+        else:
+            messages.error(request, 'This property is either approved or not available for booking.')
 
-    # Create a new booking if no previous booking exists
-    Booking.objects.create(property=property, client=request.user, is_booked=True, approval_status='pending')
-    
-    # Redirect to a confirmation or properties page with a success message
-    messages.success(request, "Your booking request has been submitted and is pending approval.")
-    return redirect(reverse('property_detail', args=[property.id]))
+    return render(request, 'book_property.html', {'property': property})
 
-def booking_list(request):
-    bookings = Booking.objects.all()  # Retrieve all bookings, or filter by user if needed
-    return render(request, 'booking_list.html', {'bookings': bookings})
-
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Booking, Property
+from django.contrib import messages
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import Booking
 @login_required
 def approve_booking(request, id):
     # Fetch the booking object, ensure it's not already booked
@@ -218,6 +194,60 @@ def approve_booking(request, id):
     return render(request, 'approve_booking.html', {'booking': booking})
 
 
+
+
+
+
+@login_required
+def reject_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, property__seller=request.user)
+    
+    # Reject the booking
+    booking.approval_status = 'rejected'
+    booking.save()
+    return redirect('/property')  # Redirect to seller's booking list
+
+from django.shortcuts import render, get_object_or_404
+from .models import Property, Booking
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def property_detail(request, property_id):
+    property = get_object_or_404(Property, id=property_id)
+    booking = None
+
+    # Check if the user has a booking for this property
+    if request.user.is_authenticated:
+        booking = Booking.objects.filter(property=property, client=request.user).first()
+
+    # Determine availability based on the booking status
+    is_available = property.is_available and (booking is None or booking.approval_status != 'approved')
+
+    context = {
+        'property': property,
+        'booking': booking,
+        'is_available': is_available,
+    }
+    return render(request, 'property_detail.html', context)
+
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Property, Booking
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def seller_bookings(request):
+    # Fetch properties listed by the logged-in seller
+    properties = Property.objects.filter(seller=request.user)
+    
+    # Retrieve all bookings related to these properties
+    bookings = Booking.objects.filter(property__in=properties)
+
+    context = {
+        'bookings': bookings,
+    }
+    return render(request, 'seller_bookings.html', context)
+
+
 @login_required
 def update_booking_status(request, booking_id, status):
     booking = get_object_or_404(Booking, id=booking_id, property__seller=request.user)
@@ -226,5 +256,41 @@ def update_booking_status(request, booking_id, status):
         booking.save()
     return redirect('seller_bookings')
 
+@login_required
+def book_property(request, property_id):
+    # Ensure the property exists and is available
+    property = get_object_or_404(Property, id=property_id, is_available=True)
+
+    if request.method == 'POST':
+        # Check if the user already has a pending or confirmed booking for this property
+        if Booking.objects.filter(property=property, client=request.user, approval_status__in=['pending', 'confirmed']).exists():
+            messages.warning(request, "You already have an existing booking for this property.")
+            return redirect('/property/')
+
+        # Check if the property has any confirmed bookings by other users
+        if Booking.objects.filter(property=property, approval_status='confirmed').exists():
+            messages.warning(request, "This property is already fully booked.")
+            return redirect('/property/')
+
+        # Create a new booking request
+        booking = Booking(property=property, client=request.user, approval_status='pending')
+        booking.save()
+
+        messages.success(request, "Your booking request has been submitted successfully!")
+        return redirect('/property/')
+
+    return render(request, 'book_property.html', {'property': property})
+
+def Properties(request):
+    property=Property.objects.filter()
+    context={
+        'property':property
+    }
+    return render(request,'Property.html',context)
+
+def booking_list(request):
+    # Fetch bookings that are not approved
+    bookings = Booking.objects.filter(approval_status__in=['pending', 'rejected'])
+    return render(request, 'booking_list.html', {'bookings': bookings})
 
 
