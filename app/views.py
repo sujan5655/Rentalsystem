@@ -56,7 +56,7 @@ def login_page(request):
 def logout_page(request):
     if request.user.is_authenticated:
         logout(request)  
-    return redirect('/login/')  
+    return redirect('login')  
 
 def home_page(request):
     return render(request, 'home.html')
@@ -310,63 +310,3 @@ def contact_view(request):
 
     return render(request, 'contact.html')
 
-
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import Group
-from django.http import HttpResponseForbidden
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Property
-from .forms import PropertyForm
-
-# Define a function to check if the user is in the 'Admin' group
-def is_user_admin(user):
-    admin_group = Group.objects.get(name='@Sujan8888')
-    admin_group = Group.objects.get(name='@Prasidha7777')
-
-    return user.groups.filter(id=admin_group.id).exists()
-
-# List view for properties (only accessible to admins)
-@login_required
-def property_list(request):
-    if not is_user_admin(request.user):
-        return HttpResponseForbidden("You do not have permission to access this page.")
-    properties = Property.objects.all()
-    return render(request, 'property_list.html', {'properties': properties})
-
-# Create view for properties (only accessible to admins)
-@login_required
-def create_property(request):
-    if not is_user_admin(request.user):
-        return HttpResponseForbidden("You do not have permission to access this page.")
-    if request.method == 'POST':
-        form = PropertyForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('property_list')
-    else:
-        form = PropertyForm()
-    return render(request, 'create_property.html', {'form': form})
-
-# Edit view for properties (only accessible to admins)
-@login_required
-def edit_property(request, pk):
-    if not is_user_admin(request.user):
-        return HttpResponseForbidden("You do not have permission to access this page.")
-    property_instance = get_object_or_404(Property, pk=pk)
-    if request.method == 'POST':
-        form = PropertyForm(request.POST, instance=property_instance)
-        if form.is_valid():
-            form.save()
-            return redirect('property_list')
-    else:
-        form = PropertyForm(instance=property_instance)
-    return render(request, 'edit_property.html', {'form': form, 'property': property_instance})
-
-# Delete view for properties (only accessible to admins)
-@login_required
-def delete_property(request, pk):
-    if not is_user_admin(request.user):
-        return HttpResponseForbidden("You do not have permission to access this page.")
-    property_instance = get_object_or_404(Property, pk=pk)
-    property_instance.delete()
-    return redirect('property_list')

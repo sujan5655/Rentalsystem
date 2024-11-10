@@ -1,7 +1,7 @@
 
 from django.urls import path
 from app.views import registration,login_page,home_page,logout_page,seller_dashboard,add_property,update_property,property_detail,book_property,update_booking_status,seller_bookings,approve_booking,Properties,booking_list
-from .views import contact_view,edit_property
+from .views import contact_view
 
 urlpatterns = [
     path('register/',registration,name='register'),
@@ -14,7 +14,7 @@ urlpatterns = [
    
 
     path('', Properties, name='allproperties'),
- path('properties/edit/<int:property_id>/', edit_property, name='edit_property'),
+
     path('property/<int:property_id>/', property_detail, name='property_detail'),
     path('book/<int:property_id>/', book_property, name='book_property'),
       path('seller/bookings/', seller_bookings, name='seller_bookings'),

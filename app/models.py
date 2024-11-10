@@ -15,7 +15,7 @@ class Property(models.Model):
     is_available = models.BooleanField(default=True)
     image = models.ImageField(upload_to='property_images/', blank=True, null=True) 
     def __str__(self):
-        return f'{self.name} - {self.id}'
+        return f'{self.title} - {self.id}'
     
 
 class Booking(models.Model):
@@ -30,4 +30,4 @@ class Booking(models.Model):
     )
 
     def __str__(self):
-        return f'{self.property.name} - {self.client.username}'
+        return f'{self.property.seller} - {self.client.username}'
