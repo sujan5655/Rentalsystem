@@ -45,7 +45,7 @@ def login_page(request):
         
         if user is not None:
             login(request, user)
-            return redirect('home')  # Redirect to a home page or desired page after login
+            return redirect('addproperty')  # Redirect to a home page or desired page after login
         else:
             messages.error(request, 'Invalid email or password.')
             return redirect('login')  # Redirect back to login page if authentication fails

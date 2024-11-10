@@ -8,11 +8,11 @@ urlpatterns = [
     path('home/',home_page,name='home'),
     path('logout/',logout_page,name='logout'),
     path('seller/', seller_dashboard, name='seller'),
-    path('add/',add_property,name='addproperty'),
+    path('add',add_property,name='addproperty'),
     path('update/<int:id>/',update_property,name='update'),
    
 
-    path('property/', Properties, name='allproperties'),
+    path('', Properties, name='allproperties'),
 
     path('property/<int:property_id>/', property_detail, name='property_detail'),
     path('book/<int:property_id>/', book_property, name='book_property'),

@@ -13,8 +13,10 @@ class Property(models.Model):
         default='pending'
     )
     is_available = models.BooleanField(default=True)
+    image = models.ImageField(upload_to='property_images/', blank=True, null=True) 
     def __str__(self):
         return f'{self.name} - {self.id}'
+    
 
 class Booking(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='bookings')

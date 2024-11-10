@@ -6,16 +6,16 @@
   <title>Navbar and Footer</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="flex flex-col min-h-screen">
+<body class="flex flex-col min-h-screen bg-green-100">
 
   <!-- Navbar -->
-  <nav class="bg-[#2F3C7E] p-4">
+  <nav class="bg-green-700 p-4">
     <div class="container mx-auto flex justify-between items-center">
       <div class="text-white text-xl font-semibold">Logo</div>
       <ul class="flex space-x-6">
         <li><a href="#" class="text-white hover:text-gray-300">Home</a></li>
-        <li><a href="#" class="text-white hover:text-gray-300">Buying</a></li>
-        <li><a href="#" class="text-white hover:text-gray-300">Selling</a></li>
+        <li><a href="" class="text-white hover:text-gray-300">Buy</a></li>
+        <li><a href="/add" class="text-white hover:text-gray-300">Sell</a></li>
         <li><a href="#" class="text-white hover:text-gray-300">Contact</a></li>
       </ul>
     </div>
@@ -29,14 +29,14 @@
 
   <!-- Main Content -->
   <div class="flex-grow p-6">
-    <h1 class="text-2xl font-semibold">Properties</h1>
+    <h1 class="text-2xl font-semibold text-green-900">Properties</h1>
     {% block content %}
     <!-- Child content will go here -->
     {% endblock %}
   </div>
 
   <!-- Footer -->
-  <footer class="bg-gray-800 text-white text-center p-5 w-full">
+  <footer class="bg-green-800 text-white text-center p-5 w-full">
     <p>&copy; 2024 Your Company. All rights reserved.</p>
   </footer>
 

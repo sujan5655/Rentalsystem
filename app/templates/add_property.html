@@ -1,3 +1,5 @@
+{% extends 'navbar_footer.html' %}
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,16 +32,7 @@
             {% endif %}
 
             <!-- Add Tailwind classes for input field styling -->
-            <div class="space-y-4">
-                {% for field in form %}
-                    <div class="flex flex-col">
-                        <label for="{{ field.id_for_label }}" class="text-sm font-semibold text-white">{{ field.label }}</label>
-                        <div class="mt-1">
-                            <input type="text" name="{{ field.name }}" class="bg-blue-200 text-black rounded-lg p-2 w-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter value" />
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
+           
 
             <div class="mt-4 flex justify-center">
                 <button type="submit" class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700">
@@ -55,3 +48,4 @@
 
 </body>
 </html>
+{% endblock %}
