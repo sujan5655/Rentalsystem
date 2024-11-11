@@ -5,16 +5,13 @@ from .views import contact_view
 
 urlpatterns = [
     path('register/',registration,name='register'),
-    path('login',login_page,name='login'),
+    path('login/',login_page,name='loginpage'),
     path('home',home_page,name='home'),
     path('logout',logout_page,name='logout'),
     path('seller/', seller_dashboard, name='seller'),
     path('add',add_property,name='addproperty'),
     path('update/<int:id>/',update_property,name='update'),
-   
-
-    path('', Properties, name='allproperties'),
-
+    path('property/', Properties, name='allproperties'),
     path('property/<int:property_id>/', property_detail, name='property_detail'),
     path('book/<int:property_id>/', book_property, name='book_property'),
       path('seller/bookings/', seller_bookings, name='seller_bookings'),
